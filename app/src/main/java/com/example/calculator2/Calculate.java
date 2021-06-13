@@ -13,14 +13,12 @@ import java.util.ArrayList;
 public class Calculate extends AppCompatActivity {
 TextView user;
 public static StringBuilder equation;//顯示運算式(儲存字元串)
-public static ArrayList calculate;//計算式
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calculate);
         equation=new StringBuilder();
-        calculate=new ArrayList<>();
         Bundle bundle = getIntent().getExtras();
         String name = bundle.getString("name");
         user = findViewById(R.id.user);
@@ -41,9 +39,8 @@ public static ArrayList calculate;//計算式
         Button multi = findViewById(R.id.multiply);
         Button divide = findViewById(R.id.divide);
         Button C = findViewById(R.id.C);
-        Button point = findViewById(R.id.point);
         Button ce = findViewById(R.id.CE);
-        Button back = findViewById(R.id.back);
+        Button point = findViewById(R.id.point);
         Button equals = findViewById(R.id.equals);
         EditText total = findViewById(R.id.total);
 
@@ -51,7 +48,8 @@ public static ArrayList calculate;//計算式
             @Override
             public void onClick(View view) {
                 if(!(equation.toString().equals("0"))){
-                        equation.append("0");//顯示運算式
+                        equation.append("0");//append:將char參數的字符串表示形式附加到給定序列
+                    // char參數附加到此StringBuilder序列的內容之後
                         total.setText(equation);
                 }
 
@@ -154,205 +152,74 @@ public static ArrayList calculate;//計算式
             @Override
             public void onClick(View view) {
                 int n = Integer.parseInt(String.valueOf(equation));
-                int a = 1;
+                int a = 1;//儲存乘階的值
                 for(int i = 1;i <= n;i++) {
                     a *= i;
                 }
                 total.setText(Integer.toString(a));
             }
         });
-        point.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                    equation.append(".");
-                    total.setText(equation);
-            }
-        });
         ce.setOnClickListener(new View.OnClickListener() {//清除
             @Override
             public void onClick(View view) {
                 equation.delete(0,equation.length());
-                calculate.clear();
                 total.setText("");
             }
         });
-        back.setOnClickListener(new View.OnClickListener() {//倒退，在equal後點選全清除，一般輸入則後退一格
+        point.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                if(!(equation.toString().equals(""))) {
-                    if(equation.equals("")){
-                        equation.deleteCharAt(equation.length() - 1);
-                        total.setText(equation);
-                    }
-
-                }
+            public void onClick(View view) {
+                equation.append(".");
+                total.setText(equation);
             }
         });
         equals.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(equation.charAt(0)=='-')
-                    equation.insert(0,"0");
-                StringBuilder sb1 =new StringBuilder();
-                for(int i=0;i<equation.length();i++){
-                    if(equation.charAt(i)>='0'&&equation.charAt(i)<='9'||equation.charAt(i)=='.'){
-                        sb1.append(String.valueOf(equation.charAt(i)));//CharAt()返回指定的索引範圍
+                String sb = equation.toString();//stringbuilder轉字串
+                for(int i=0;i<sb.length();i++){
+                    char b;//符號
+                    int x;
+                    x=i;
+                    b=sb.charAt(i);
+                    if(b=='+'||b=='-'||b=='*'||b=='/'){
+                        i++;
+                    String s1 = sb.substring(0,x);
+                    String s2 = sb.substring(x+1,sb.length());
+                    double ss1 = Integer.parseInt(s1);
+                    double ss2 = Integer.parseInt(s2);
+                    double sum;
+
+                    switch(b) {
+                        case '+': {
+                            sum = ss1 + ss2;
+                            total.setText(Double.toString(sum));
+                            break;
+                        }
+                        case '-': {
+                            sum = ss1 - ss2;
+                            total.setText(Double.toString(sum));
+                            break;
+                        }
+                        case '*': {
+                            sum = ss1 * ss2;
+                            total.setText(Double.toString(sum));
+                            break;
+                        }
+                        case '/': {
+                            sum = ss1 / ss2;
+                            total.setText(Double.toString(sum));
+                            break;
+                        }
                     }
-                    else
-                    {
-                        calculate.add(sb1.toString());
-                        sb1.delete(0,sb1.length());
-                        calculate.add(String.valueOf(equation.charAt(i)));
+                    
                     }
+
                 }
-                calculate.add(sb1.toString());
-                calculate.add("#");
-                String sb8=calculation(calculate);
-                total.setText(sb8);
+
             }
         });
-    }
-    protected boolean Comparative(char op1,char op2){//運算優先的比較級
-        int o1=0;
-        int o2=0;
-        switch (op1){
-            case '+':{
-                o1=0;
-            break;
-            }
-            case '-':{
-                o1=0;
-            break;
-            }
-            case '*':{
-                o1=1;
-            break;
-            }
-            case '/':{
-                o1=1;
-                break;
-            }
-        }
-        switch (op2){
-            case '+':{
-                o2=0;
-                break;
-            }
-            case '-':{
-                o2=0;
-                break;
-            }
-            case '*':{
-                o2=1;
-                break;
-            }
-            case '/':{
-                o2=1;
-                break;
-            }
-        }
-        if(o1<=o2)
-        {
-            return false;
-        }
-        else
-            return true;
-    }
-    protected String calculation(ArrayList equation){
-        Double sb2;
-        Double sb3;
-        Double result;
-        ArrayList operator=new ArrayList();
-        ArrayList operand=new ArrayList();
-        for(int i=0;i<equation.size();i++)
-        {
-            String sb4=(String) equation.get(i);
-            if(sb4.equals("+")||sb4.equals("-")||sb4.equals("*")||sb4.equals("/")||sb4.equals("!"))
-            {
-                if(operator.size()>0)
-                {
-                    String sb5=operator.get(operator.size()-1).toString();
-                    while(!(Comparative(sb4.charAt(0),sb5.charAt(0)))&&operator.size()>0)
-                    {
-                        operator.remove(operator.size()-1);
-                        sb2=(Double.parseDouble(operand.get(operand.size()-1).toString()));
-                        operand.remove(operand.size()-1);
-                        sb3=(Double.parseDouble(operand.get(operand.size()-1).toString()));
-                        operand.remove(operand.size()-1);
-                        switch (sb5.charAt(0)){
-                            case '+':{
-                                result = sb2+sb3;
-                                operand.add(String.valueOf(result));
-                            break;
-                            }
-                            case '-':{
-                                result = sb2-sb3;
-                                operand.add(String.valueOf(result));
-                            break;
-                            }
-                            case '*':{
-                                result = sb2*sb3;
-                                operand.add(String.valueOf(result));
-                            break;
-                            }
-                            case '/':{
-                                result = sb2/sb3;
-                                operand.add(String.valueOf(result));
-                            break;
-                            }
 
-                        }
-                        if(operator.size()>0)
-                        {
-                            sb5=operator.get(operator.size()-1).toString();
-                        }
-                        else
-                            break;
-                    }
-                    operator.add(sb4);
-                }
-                else
-                    operator.add(sb4);
-            }
-            else if(sb4.equals("#"))
-            {
-                while(operator.size()>0)
-                {
-                    String sb6=(String)operator.get(operator.size()-1);
-                    operator.remove(operator.size()-1);
-                    sb3=(Double.parseDouble(operand.get(operand.size()-1).toString()));
-                    operand.remove(operand.size()-1);
-                    sb2=(Double.parseDouble(operand.get(operand.size()-1).toString()));
-                    operand.remove(operand.size()-1);
-                    switch (sb6.charAt(0)){
-                        case '+': {
-                            result=sb2+sb3;
-                            operand.add(String.valueOf(result));
-                        break;
-                        }
-                        case '-':{
-                            result=sb2-sb3;
-                            operand.add(String.valueOf(result));
-                        break;
-                        }
-                        case '*':{
-                            result=sb2*sb3;
-                            operand.add(String.valueOf(result));
-                        break;
-                        }
-                        case '/':{
-                            result=sb2/sb3;
-                            operand.add(String.valueOf(result));
-                        break;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                operand.add(sb4);
-            }
-        }
-        return operand.get(0).toString();
     }
+
 }
